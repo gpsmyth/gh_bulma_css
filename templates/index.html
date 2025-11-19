@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flask Todos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+  <style>
+    /* remove underline for text-style buttons (and keep hover/focus clean) */
+    .button.is-text,
+    .button.is-text:hover,
+    .button.is-text:focus {
+      text-decoration: none;
+      box-shadow: none;
+    }
+
+    /* if you ever use plain anchors for tasks, prevent underline too */
+    a.has-text-link {
+      text-decoration: none;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    .todos {
+      max-width: 100%;
+      margin: auto;
+    }
+  </style>
+</head>
+<body class="has-background-light">
+  <div class="section hero">
+    <div class="box todos">
+      <h1 class="title">Flask Todos</h1>
+      <form action="/create-todo" method="post">
+        <div class="field has-addons">
+          <!-- {{ csrf_token() }} -->
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="control">
+            <input type="text" name="title" class="input" placeholder="New todo" required>
+          </div>
+          <div class="control">
+            <button type="submit" class="button is-primary">Create</button>
+          </div>
+        </div>
+      </form>
+      <div class="mt-4">
+        {% for todo in todos %}
+        <div class="columns">
+          <div class="column is-10">
+            <form action="{{ url_for('update_todo', todo_id=todo.id) }}" method="post" style="display:inline;">
+              <!-- {{ csrf_token() }} -->
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="button is-text has-text-dark">
+                {% if todo.done %}
+                  <s>{{ todo.task }}</s>
+                {% else %}
+                  {{ todo.task }}
+                {% endif %}
+              </button>
+            </form>
+          </div>
+          <div class="column is-narrow">
+            <!-- <a> tags cannot send POST requests, so they cannot carry a CSRF token -->
+            <!-- <a href="{{ url_for('delete_todo', todo_id=todo.id) }}" class="delete"></a> -->
+            <form action="{{ url_for('delete_todo', todo_id=todo.id) }}" method="post" style="display:inline;">
+              <!-- {{ csrf_token() }} -->
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="delete"></button>
+              <!-- Why this works
+                    Flask-WTF expects the token to be named csrf_token
+                    Using <button class="delete"> matches Bulma’s delete icon exactly
+                    Wrapping it in <form> ensures a POST request instead of GET -->
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
